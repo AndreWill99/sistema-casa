@@ -1,0 +1,261 @@
+.figma-dashboard {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1320px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+    color: #810F0F;
+}
+
+.top-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.figma-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E3CFC0;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 2px 10px rgba(129, 15, 15, 0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.figma-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(129, 15, 15, 0.06);
+}
+
+.card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-figma-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #810F0F;
+}
+
+.tag-mensal {
+    background-color: #FFEED5;
+    color: #810F0F;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.card-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+}
+
+.card-big-number {
+    font-size: 38px;
+    font-weight: 800;
+    color: #810F0F;
+    line-height: 1;
+}
+
+.trend-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #006F18;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.figma-btn-action {
+    background-color: #810F0F;
+    color: #FFEED5;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(129, 15, 15, 0.12);
+}
+
+.figma-btn-action:hover {
+    background-color: #500707;
+}
+
+.bottom-cards-grid {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap: 24px;
+}
+
+/* Saldo do Mês Card */
+.saldo-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E3CFC0;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 2px 10px rgba(129, 15, 15, 0.03);
+}
+
+.saldo-amount {
+    font-size: 32px;
+    font-weight: 800;
+    color: #810F0F;
+    margin-top: 4px;
+}
+
+.progress-bar-container {
+    height: 12px;
+    width: 100%;
+    background-color: #FFEED5;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+}
+
+.bar-receitas {
+    height: 100%;
+    background-color: #166534;
+}
+
+.bar-despesas {
+    height: 100%;
+    background-color: #810F0F;
+}
+
+.legend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13.5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.legend-dot-green {
+    width: 10px;
+    height: 10px;
+    background-color: #166534;
+    border-radius: 3px;
+}
+
+.legend-dot-red {
+    width: 10px;
+    height: 10px;
+    background-color: #810F0F;
+    border-radius: 3px;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid #FFEED5;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    color: #810F0F;
+}
+
+/* Calendário Card (Home-dashboard2) */
+.calendario-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E3CFC0;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 2px 10px rgba(129, 15, 15, 0.03);
+}
+
+.cal-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1.5px solid #FFEED5;
+    padding-bottom: 14px;
+}
+
+.cal-day-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #810F0F;
+}
+
+.cal-day-number {
+    font-size: 26px;
+    font-weight: 800;
+    color: #810F0F;
+    background-color: #FFEED5;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visitas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.visita-item {
+    background-color: #FFF8EE;
+    border: 1px solid #E3CFC0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.visita-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #810F0F;
+}
+
+.visita-horario {
+    font-size: 13px;
+    font-weight: 700;
+    color: #810F0F;
+    background-color: #FFEED5;
+    padding: 4px 10px;
+    border-radius: 6px;
+}

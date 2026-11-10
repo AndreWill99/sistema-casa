@@ -1,0 +1,7 @@
+/* Uses matching split layout styling from Login.css */
+.register-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    font-family: 'Urbanist', sans-serif;
+}

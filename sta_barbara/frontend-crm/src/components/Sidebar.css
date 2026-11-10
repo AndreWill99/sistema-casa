@@ -1,0 +1,140 @@
+.sidebar-container {
+    width: 250px;
+    background-color: #FFFFFF;
+    color: #810F0F;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+    border-right: 1.5px solid #E3CFC0;
+    box-shadow: 2px 0 12px rgba(129, 15, 15, 0.04);
+    z-index: 10;
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar-header {
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #E3CFC0;
+}
+
+.sidebar-logo {
+    width: 100px;
+    height: auto;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #810F0F;
+    line-height: 1.2;
+}
+
+.sidebar-subtitle {
+    font-size: 11px;
+    color: #786565;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 16px;
+    border-radius: 10px;
+    color: #810F0F;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.nav-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-icon {
+    font-size: 18px;
+    width: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #810F0F;
+}
+
+.nav-badge {
+    background-color: #FFEED5;
+    color: #810F0F;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.nav-item:hover {
+    background-color: #FFF8EE;
+    color: #810F0F;
+    transform: translateX(2px);
+}
+
+.nav-item.active {
+    background-color: #810F0F;
+    color: #FFEED5;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(129, 15, 15, 0.15);
+}
+
+.nav-item.active .nav-icon {
+    color: #FFEED5;
+}
+
+.nav-item.active .nav-badge {
+    background-color: #FFEED5;
+    color: #810F0F;
+}
+
+.sidebar-footer {
+    padding: 20px 16px;
+    border-top: 1px solid #E3CFC0;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 11px;
+    background-color: #FFF8EE;
+    border: 1px solid #810F0F;
+    border-radius: 10px;
+    color: #810F0F;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: #810F0F;
+    color: #FFEED5;
+}
