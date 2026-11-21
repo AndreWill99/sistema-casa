@@ -26,11 +26,22 @@ function App() {
 
   if (!logado) {
     if (telaAuth === 'cadastro') {
-      return <Register onVoltarLogin={() => setTelaAuth('login')} />;
+      return (
+        <Register
+          onVoltarLogin={() => setTelaAuth('login')}
+          onRegisterSuccess={(usuarioCriado) => {
+            if (usuarioCriado && usuarioCriado.nome) {
+              setUsuarioAtual(usuarioCriado.nome);
+            }
+            setTelaAuth('login');
+          }}
+        />
+      );
     }
     return (
       <Login
         onLoginSuccess={handleLoginSuccess}
+        onIrParaCadastro={() => setTelaAuth('cadastro')}
       />
     );
   }

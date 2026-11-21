@@ -379,6 +379,35 @@ html {
     border: 1px solid #FAD2CF;
 }
 
+.auth-footer-text {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.auth-link-btn {
+    background: none;
+    border: none;
+    color: var(--bg-burgundy-main);
+    font-weight: 700;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.auth-link-btn:hover {
+    color: var(--bg-burgundy-dark);
+    text-decoration: underline;
+}
+
 /* Media Queries */
 @media (max-width: 900px) {
     .login-container {

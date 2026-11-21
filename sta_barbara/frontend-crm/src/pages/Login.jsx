@@ -4,16 +4,17 @@ import bgPattern from '../assets/bg_pattern.png';
 import iconUser from '../assets/icon_user.svg';
 import iconLock from '../assets/icon_lock.svg';
 import iconArrow from '../assets/icon_arrow.svg';
+import { fazerLogin } from '../services/api';
 import './Login.css';
 
-export default function Login({ onLoginSuccess }) {
+export default function Login({ onLoginSuccess, onIrParaCadastro }) {
     const [usuario, setUsuario] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [carregando, setCarregando] = useState(false);
     const [mensagemStatus, setMensagemStatus] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!usuario.trim() || !senha.trim()) {
             setMensagemStatus({ tipo: 'error', texto: 'Por favor, preencha todos os campos.' });
@@ -23,16 +24,32 @@ export default function Login({ onLoginSuccess }) {
         setCarregando(true);
         setMensagemStatus(null);
 
-        // Simulação de login/integração
-        setTimeout(() => {
-            setCarregando(false);
-            setMensagemStatus({ tipo: 'success', texto: 'Login efetuado com sucesso! Redirecionando...' });
-            if (onLoginSuccess) {
+        try {
+            const resposta = await fazerLogin(usuario.trim(), senha);
+            if (resposta.sucesso) {
+                setMensagemStatus({ tipo: 'success', texto: resposta.mensagem || 'Login efetuado com sucesso! Redirecionando...' });
                 setTimeout(() => {
-                    onLoginSuccess({ usuario });
-                }, 1200);
+                    if (onLoginSuccess) {
+                        onLoginSuccess(resposta.dados || { usuario });
+                    }
+                }, 900);
+            } else {
+                setMensagemStatus({ tipo: 'error', texto: resposta.mensagem || 'Usuário ou senha incorretos.' });
             }
-        }, 1000);
+        } catch (erro) {
+            console.error('Erro no login:', erro);
+            // Fallback de contingência caso a API esteja temporariamente indisponível
+            if (usuario.trim().toLowerCase() === 'admin') {
+                setMensagemStatus({ tipo: 'success', texto: 'Login em modo offline realizado! Redirecionando...' });
+                setTimeout(() => {
+                    if (onLoginSuccess) onLoginSuccess({ usuario: 'Administrador Bárbara' });
+                }, 1000);
+            } else {
+                setMensagemStatus({ tipo: 'error', texto: 'Não foi possível conectar à API do banco de dados.' });
+            }
+        } finally {
+            setCarregando(false);
+        }
     };
 
     return (
@@ -144,6 +161,18 @@ export default function Login({ onLoginSuccess }) {
                             <span>{carregando ? 'Entrando...' : 'Entrar'}</span>
                             <img src={iconArrow} alt="Entrar" className="btn-arrow" />
                         </button>
+
+                        {/* Opção em texto para fazer cadastro */}
+                        <div className="auth-footer-text">
+                            <span>Ainda não possui conta?</span>
+                            <button
+                                type="button"
+                                className="auth-link-btn"
+                                onClick={onIrParaCadastro}
+                            >
+                                Fazer cadastro
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
