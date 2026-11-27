@@ -8,6 +8,7 @@ from database import db
 
 from routes_residentes import residentes_bp
 from routes_auth import auth_bp
+from routes_crm import crm_bp
 
 # 1. Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -19,6 +20,7 @@ def create_app():
     # 2. Registra os Blueprints das rotas da API
     app.register_blueprint(residentes_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(crm_bp)
 
     @app.route('/api/status', methods=['GET'])
     def status():

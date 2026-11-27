@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FiPlus,
     FiChevronLeft,
@@ -8,220 +8,31 @@ import {
     FiX,
     FiChevronDown
 } from 'react-icons/fi';
+import { listarEventosAgenda, criarEventoAgenda } from '../services/api';
 import './Agenda.css';
 
-export default function Agenda() {
-    // Initial Dataset matching Figma screenshot exactly
-    const [eventos, setEventos] = useState([
-        {
-            id: 1,
-            titulo: 'Fam. Sr. João',
-            residente: 'Sr. João Silva',
-            categoria: 'Visita Familiar', // 'Visita Familiar' | 'Evento' | 'Data Festiva'
-            dia: 3,
-            mesIndex: 6, // 6 = Julho
-            ano: 2025,
-            horaInicio: '14:00',
-            horaFim: '15:30',
-            responsavel: 'Família Silva',
-            obs: 'Visita na recepção principal.'
-        },
-        {
-            id: 2,
-            titulo: 'Igreja Batista',
-            residente: 'Todos os Residentes',
-            categoria: 'Evento',
-            dia: 4,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '10:00',
-            horaFim: '11:30',
-            responsavel: 'Pastor Marcos',
-            obs: 'Culto ecumênico e cânticos.'
-        },
-        {
-            id: 3,
-            titulo: 'Fam. Sra. Rosa',
-            residente: 'Sra. Rosa Oliveira',
-            categoria: 'Visita Familiar',
-            dia: 7,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '15:00',
-            horaFim: '16:30',
-            responsavel: 'Luciana (Filha)',
-            obs: 'Passeio no jardim.'
-        },
-        {
-            id: 4,
-            titulo: 'Aniv. Sr. Pedro',
-            residente: 'Sr. Pedro Santos',
-            categoria: 'Data Festiva',
-            dia: 9,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '16:00',
-            horaFim: '17:30',
-            responsavel: 'Equipe de Animação',
-            obs: 'Comemoração de 85 anos com bolo.'
-        },
-        {
-            id: 5,
-            titulo: 'Fam. Sr. Carlos',
-            residente: 'Sr. Carlos Mendes',
-            categoria: 'Visita Familiar',
-            dia: 10,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '14:30',
-            horaFim: '15:30',
-            responsavel: 'Carlos Filho',
-            obs: 'Entrega de pertences pessoais.'
-        },
-        {
-            id: 6,
-            titulo: 'ONG Esperança',
-            residente: 'Todos os Residentes',
-            categoria: 'Evento',
-            dia: 12,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '14:00',
-            horaFim: '16:00',
-            responsavel: 'Voluntários ONG',
-            obs: 'Oficina de artesanato e pintura.'
-        },
-        {
-            id: 7,
-            titulo: 'Visita Ana Lima',
-            residente: 'Sr. José Lima',
-            categoria: 'Visita Familiar',
-            dia: 15,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '14:00',
-            horaFim: '15:30',
-            responsavel: 'Ana Lima (Filha)',
-            obs: 'Visita familiar na sala VIP.'
-        },
-        {
-            id: 8,
-            titulo: 'Aniv. Sra. Elza',
-            residente: 'Sra. Elza dos Santos',
-            categoria: 'Data Festiva',
-            dia: 15,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '16:00',
-            horaFim: '17:30',
-            responsavel: 'Família Elza (4 pessoas)',
-            obs: 'Comemoração de 83 anos.'
-        },
-        {
-            id: 9,
-            titulo: 'Coral da Paz',
-            residente: 'Todos os Residentes',
-            categoria: 'Evento',
-            dia: 17,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '10:00',
-            horaFim: '11:00',
-            responsavel: 'Maestro Fernando',
-            obs: 'Apresentação musical no auditório.'
-        },
-        {
-            id: 10,
-            titulo: 'Fam. Sra. Maria',
-            residente: 'Sra. Maria Fernandes',
-            categoria: 'Visita Familiar',
-            dia: 18,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '15:30',
-            horaFim: '16:30',
-            responsavel: 'Carlos M.',
-            obs: 'Visita de fim de semana.'
-        },
-        {
-            id: 11,
-            titulo: 'Fam. Sr. Antônio',
-            residente: 'Sr. Antônio Costa',
-            categoria: 'Visita Familiar',
-            dia: 21,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '11:00',
-            horaFim: '12:00',
-            responsavel: 'Família Costa',
-            obs: 'Almoço de domingo.'
-        },
-        {
-            id: 12,
-            titulo: 'Aniv. Sr. João',
-            residente: 'Sr. João Silva',
-            categoria: 'Data Festiva',
-            dia: 23,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '15:00',
-            horaFim: '16:30',
-            responsavel: 'Recepção',
-            obs: 'Aniversário de 88 anos.'
-        },
-        {
-            id: 13,
-            titulo: 'Visita Carlos M.',
-            residente: 'Sr. Carlos Mendes',
-            categoria: 'Visita Familiar',
-            dia: 24,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '10:00',
-            horaFim: '11:00',
-            responsavel: 'Marcos M.',
-            obs: 'Acompanhamento médico.'
-        },
-        {
-            id: 14,
-            titulo: 'Visita ONG',
-            residente: 'Todos os Residentes',
-            categoria: 'Evento',
-            dia: 25,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '14:00',
-            horaFim: '16:00',
-            responsavel: 'Voluntários',
-            obs: 'Terapia assistida com animais.'
-        },
-        {
-            id: 15,
-            titulo: 'Fam. Sra. Helena',
-            residente: 'Sra. Maria Helena Silva',
-            categoria: 'Visita Familiar',
-            dia: 28,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '15:00',
-            horaFim: '16:00',
-            responsavel: 'Ana Silva',
-            obs: 'Visita no quarto 102.'
-        },
-        {
-            id: 16,
-            titulo: 'Aniv. Sra. Rosa',
-            residente: 'Sra. Rosa Oliveira',
-            categoria: 'Data Festiva',
-            dia: 31,
-            mesIndex: 6,
-            ano: 2025,
-            horaInicio: '16:00',
-            horaFim: '17:30',
-            responsavel: 'Cuidadores',
-            obs: 'Aniversário de 90 anos.'
+export default function Agenda({ onAtualizar }) {
+    // Lista dinâmica carregada da API (sem dados mockados)
+    const [eventos, setEventos] = useState([]);
+    const [carregando, setCarregando] = useState(false);
+
+    const carregarEventos = async () => {
+        setCarregando(true);
+        try {
+            const resp = await listarEventosAgenda();
+            if (resp && resp.dados) {
+                setEventos(resp.dados);
+            }
+        } catch (err) {
+            console.error('Erro ao carregar agenda:', err);
+        } finally {
+            setCarregando(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        carregarEventos();
+    }, []);
 
     // UI States matching screenshot
     const [visaoAtiva, setVisaoAtiva] = useState('Mês'); // 'Mês' | 'Semana' | 'Lista'
@@ -334,7 +145,7 @@ export default function Agenda() {
         setModalNovoEventoAberta(true);
     };
 
-    const handleSalvarEvento = (e) => {
+    const handleSalvarEvento = async (e) => {
         e.preventDefault();
         if (!formTitulo) return;
 
@@ -359,6 +170,14 @@ export default function Agenda() {
 
         setEventos([novoEv, ...eventos]);
         setModalNovoEventoAberta(false);
+
+        try {
+            await criarEventoAgenda(novoEv);
+            await carregarEventos();
+            if (onAtualizar) onAtualizar();
+        } catch (err) {
+            console.error('Erro ao salvar evento:', err);
+        }
     };
 
     const exportarCSV = () => {
@@ -541,25 +360,33 @@ export default function Agenda() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {proximosEventosSidebar.map((ev) => (
-                                        <tr key={ev.id} style={{ cursor: 'pointer' }} onClick={() => abrirZoomDia(ev.dia)}>
-                                            <td className="desc-cell">{ev.dia}/{mesAtualIndex + 1}/{anoAtual}</td>
-                                            <td className="cargo-cell">{ev.horaInicio} - {ev.horaFim}</td>
-                                            <td className="desc-cell">{ev.titulo}</td>
-                                            <td>
-                                                <span
-                                                    className={`event-pill-item cat-${ev.categoria
-                                                        .toLowerCase()
-                                                        .replace(' ', '-')
-                                                        .replace('á', 'a')}`}
-                                                >
-                                                    {ev.categoria}
-                                                </span>
+                                    {proximosEventosSidebar.length > 0 ? (
+                                        proximosEventosSidebar.map((ev) => (
+                                            <tr key={ev.id} style={{ cursor: 'pointer' }} onClick={() => abrirZoomDia(ev.dia)}>
+                                                <td className="desc-cell">{ev.dia}/{mesAtualIndex + 1}/{anoAtual}</td>
+                                                <td className="cargo-cell">{ev.horaInicio} - {ev.horaFim}</td>
+                                                <td className="desc-cell">{ev.titulo}</td>
+                                                <td>
+                                                    <span
+                                                        className={`event-pill-item cat-${ev.categoria
+                                                            .toLowerCase()
+                                                            .replace(' ', '-')
+                                                            .replace('á', 'a')}`}
+                                                    >
+                                                        {ev.categoria}
+                                                    </span>
+                                                </td>
+                                                <td>{ev.residente}</td>
+                                                <td>{ev.responsavel}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#888' }}>
+                                                {carregando ? 'Carregando eventos...' : 'Nenhum evento agendado para este mês.'}
                                             </td>
-                                            <td>{ev.residente}</td>
-                                            <td>{ev.responsavel}</td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         </div>

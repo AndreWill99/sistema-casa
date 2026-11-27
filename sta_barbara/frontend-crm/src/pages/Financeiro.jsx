@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FiPlus,
     FiSearch,
@@ -15,9 +15,10 @@ import {
     FiDollarSign,
     FiMaximize2
 } from 'react-icons/fi';
+import { listarTransacoes, criarTransacao } from '../services/api';
 import './Financeiro.css';
 
-export default function Financeiro() {
+export default function Financeiro({ onAtualizar }) {
     // Controls
     const [modalAberta, setModalAberta] = useState(false);
     const [modalZoomAberta, setModalZoomAberta] = useState(false);
@@ -36,72 +37,73 @@ export default function Financeiro() {
     const [novaData, setNovaData] = useState('');
     const [novaObservacao, setNovaObservacao] = useState('');
 
-    const [transacoes, setTransacoes] = useState([
-        {
-            id: 1,
-            categoria: 'Mensalidade',
-            descricao: 'mensalidade senhor chance',
-            data: '02-04-2026',
-            valor: 'R$ 2.600,00',
-            tipo: 'Entrada'
-        },
-        {
-            id: 2,
-            categoria: 'Salário',
-            descricao: 'Salário Enfermeira Ana',
-            data: '05-04-2026',
-            valor: 'R$ 2.000,00',
-            tipo: 'Saida'
-        },
-        {
-            id: 3,
-            categoria: 'Mensalidade',
-            descricao: 'Mensalidade Dna. Maria Helena',
-            data: '08-04-2026',
-            valor: 'R$ 4.200,00',
-            tipo: 'Entrada'
-        },
-        {
-            id: 4,
-            categoria: 'Manutenção',
-            descricao: 'Reparo no sistema elétrico',
-            data: '10-04-2026',
-            valor: 'R$ 650,00',
-            tipo: 'Saida'
-        },
-        {
-            id: 5,
-            categoria: 'Mensalidade',
-            descricao: 'Mensalidade Sr. Antônio Carlos',
-            data: '12-04-2026',
-            valor: 'R$ 4.500,00',
-            tipo: 'Entrada'
-        },
-        {
-            id: 6,
-            categoria: 'Despesas Fixas',
-            descricao: 'Compra de medicamentos farmácia',
-            data: '15-04-2026',
-            valor: 'R$ 1.350,00',
-            tipo: 'Saida'
-        }
-    ]);
+    // Lista dinâmica carregada da API (sem dados mockados)
+    const [transacoes, setTransacoes] = useState([]);
+    const [carregando, setCarregando] = useState(false);
 
-    // Monthly Chart Data (Jan - Dez)
-    const dadosGrafico = [
-        { mes: 'Jan', mesExtenso: 'Janeiro', valor: 62, entradas: 'R$ 21.400,00', despesas: 'R$ 10.200,00', saldo: 'R$ 11.200,00', atual: false },
-        { mes: 'Fev', mesExtenso: 'Fevereiro', valor: 48, entradas: 'R$ 18.200,00', despesas: 'R$ 11.000,00', saldo: 'R$ 7.200,00', atual: false },
-        { mes: 'Mar', mesExtenso: 'Março', valor: 75, entradas: 'R$ 23.500,00', despesas: 'R$ 10.500,00', saldo: 'R$ 13.000,00', atual: false },
-        { mes: 'Abr', mesExtenso: 'Abril', valor: 83, entradas: 'R$ 25.100,00', despesas: 'R$ 11.800,00', saldo: 'R$ 13.300,00', atual: false },
-        { mes: 'Mai', mesExtenso: 'Maio', valor: 59, entradas: 'R$ 20.000,00', despesas: 'R$ 12.100,00', saldo: 'R$ 7.900,00', atual: false },
-        { mes: 'Jun', mesExtenso: 'Junho', valor: 91, entradas: 'R$ 26.800,00', despesas: 'R$ 11.200,00', saldo: 'R$ 15.600,00', atual: false },
-        { mes: 'Jul', mesExtenso: 'Julho', valor: 68, entradas: 'R$ 22.100,00', despesas: 'R$ 10.900,00', saldo: 'R$ 11.200,00', atual: false },
-        { mes: 'Ago', mesExtenso: 'Agosto', valor: 77, entradas: 'R$ 24.000,00', despesas: 'R$ 11.400,00', saldo: 'R$ 12.600,00', atual: false },
-        { mes: 'Set', mesExtenso: 'Setembro', valor: 55, entradas: 'R$ 19.800,00', despesas: 'R$ 11.000,00', saldo: 'R$ 8.800,00', atual: false },
-        { mes: 'Out', mesExtenso: 'Outubro', valor: 88, entradas: 'R$ 25.900,00', despesas: 'R$ 11.700,00', saldo: 'R$ 14.200,00', atual: false },
-        { mes: 'Nov', mesExtenso: 'Novembro', valor: 94, entradas: 'R$ 27.500,00', despesas: 'R$ 12.000,00', saldo: 'R$ 15.500,00', atual: true },
-        { mes: 'Dez', mesExtenso: 'Dezembro', valor: 70, entradas: 'R$ 23.000,00', despesas: 'R$ 11.500,00', saldo: 'R$ 11.500,00', atual: false }
-    ];
+    const parseValor = (val) => {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        const v = String(val).replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+        return parseFloat(v) || 0;
+    };
+
+    const formatarMoeda = (val) => {
+        return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    };
+
+    const carregarTransacoes = async () => {
+        setCarregando(true);
+        try {
+            const resp = await listarTransacoes();
+            if (resp && resp.dados) {
+                setTransacoes(resp.dados);
+            }
+        } catch (erro) {
+            console.error('Erro ao carregar transações:', erro);
+        } finally {
+            setCarregando(false);
+        }
+    };
+
+    useEffect(() => {
+        carregarTransacoes();
+    }, []);
+
+    // Monthly Chart Data gerado dinamicamente a partir das transações
+    const mesesAbrev = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const mesesExtenso = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const mesAtualIndex = new Date().getMonth();
+
+    const dadosGrafico = mesesAbrev.map((mes, idx) => {
+        const transacoesMes = transacoes.filter((t) => {
+            if (!t.data) return false;
+            const partes = t.data.split(/[-/]/);
+            const m = partes.length >= 2 ? parseInt(partes[1], 10) - 1 : -1;
+            return m === idx;
+        });
+
+        const ent = transacoesMes
+            .filter((t) => t.tipo === 'Entrada')
+            .reduce((acc, t) => acc + (t.valorRaw || parseValor(t.valor)), 0);
+        const desp = transacoesMes
+            .filter((t) => t.tipo === 'Saida')
+            .reduce((acc, t) => acc + (t.valorRaw || parseValor(t.valor)), 0);
+        const sld = ent - desp;
+
+        const maxVal = Math.max(ent, desp, 1);
+        const valorBarra = ent > 0 ? Math.min(100, Math.round((ent / maxVal) * 80)) : 0;
+
+        return {
+            mes,
+            mesExtenso: mesesExtenso[idx],
+            valor: valorBarra,
+            entradas: formatarMoeda(ent),
+            despesas: formatarMoeda(desp),
+            saldo: formatarMoeda(sld),
+            atual: idx === mesAtualIndex
+        };
+    });
 
     const categoriasComCores = [
         { nome: 'Receita de Aluguel', cor: '#007A33' },
@@ -111,7 +113,7 @@ export default function Financeiro() {
         { nome: 'Outros', cor: '#7C3AED' }
     ];
 
-    const handleSalvarTransacao = (e) => {
+    const handleSalvarTransacao = async (e) => {
         e.preventDefault();
         if (!novoValor) return;
 
@@ -128,18 +130,27 @@ export default function Financeiro() {
         };
 
         const valorNum = parseFloat(novoValor.replace(',', '.')) || 0;
-        const valorFormatado = `R$ ${valorNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const valorFormatado = formatarMoeda(valorNum);
 
         const novaItem = {
-            id: Date.now(),
             categoria: novaCategoria,
             descricao: novaDescricao || (tipoTransacao === 'Entrada' ? 'Receita Diversa' : 'Despesa Diversa'),
             data: formatarData(novaData),
             valor: valorFormatado,
-            tipo: tipoTransacao
+            valorRaw: valorNum,
+            tipo: tipoTransacao,
+            observacao: novaObservacao
         };
 
-        setTransacoes([novaItem, ...transacoes]);
+        try {
+            await criarTransacao(novaItem);
+            await carregarTransacoes();
+            if (onAtualizar) onAtualizar();
+        } catch (err) {
+            console.error('Falha ao salvar transação no backend:', err);
+            setTransacoes([{ ...novaItem, id: Date.now() }, ...transacoes]);
+        }
+
         setNovaDescricao('');
         setNovoValor('');
         setNovaData('');
@@ -155,12 +166,6 @@ export default function Financeiro() {
             }
             return { campo, direcao: 'asc' };
         });
-    };
-
-    const parseValor = (str) => {
-        if (!str) return 0;
-        const numStr = str.replace(/[^\d,]/g, '').replace(',', '.');
-        return parseFloat(numStr) || 0;
     };
 
     const parseData = (str) => {
@@ -227,23 +232,31 @@ export default function Financeiro() {
         document.body.removeChild(link);
     };
 
+    const totalEntradas = transacoes
+        .filter((t) => t.tipo === 'Entrada')
+        .reduce((acc, t) => acc + (t.valorRaw || parseValor(t.valor)), 0);
+    const totalDespesas = transacoes
+        .filter((t) => t.tipo === 'Saida')
+        .reduce((acc, t) => acc + (t.valorRaw || parseValor(t.valor)), 0);
+    const saldoTotal = totalEntradas - totalDespesas;
+
     return (
         <div className="financeiro-container">
             {/* 1. KPI Cards Grid */}
             <div className="metrics-grid">
                 <div className="metric-card">
                     <span className="metric-label">Entradas</span>
-                    <span className="metric-value value-entradas">R$ 24.560,00</span>
+                    <span className="metric-value value-entradas">{formatarMoeda(totalEntradas)}</span>
                 </div>
 
                 <div className="metric-card">
                     <span className="metric-label">Despesas</span>
-                    <span className="metric-value value-despesas">R$ 12.000,00</span>
+                    <span className="metric-value value-despesas">{formatarMoeda(totalDespesas)}</span>
                 </div>
 
                 <div className="metric-card">
                     <span className="metric-label">Saldo total</span>
-                    <span className="metric-value value-saldo">R$ 12.560,00</span>
+                    <span className="metric-value value-saldo">{formatarMoeda(saldoTotal)}</span>
                 </div>
             </div>
 
@@ -388,7 +401,7 @@ export default function Financeiro() {
                             ) : (
                                 <tr>
                                     <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#888' }}>
-                                        Nenhuma transação encontrada.
+                                        {carregando ? 'Carregando transações...' : 'Nenhuma transação encontrada no sistema.'}
                                     </td>
                                 </tr>
                             )}

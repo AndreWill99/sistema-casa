@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FiPlus,
     FiSearch,
@@ -17,92 +17,31 @@ import {
     FiChevronDown,
     FiDollarSign
 } from 'react-icons/fi';
+import { listarLeads, criarLead } from '../services/api';
 import './Leads.css';
 
-export default function Leads() {
-    // Lead Dataset matching Figma design
-    const [leads, setLeads] = useState([
-        {
-            id: 1,
-            interessado: 'Carlos Mendes',
-            paciente: 'Sr. Arnaldo Mendes',
-            telefone: '(11) 98111-2233',
-            email: 'carlos.mendes@email.com',
-            grau: 'Grau 2',
-            status: 'Em Contato',
-            valorEstimado: 'R$ 4.200,00',
-            observacao: 'Família solicita vaga em quarto duplo com vista para o jardim.',
-            historico: [
-                { data: '28/09/2026', desc: 'Primeiro contato telefônico realizado por Juliana.' }
-            ]
-        },
-        {
-            id: 2,
-            interessado: 'Ana Lima',
-            paciente: 'Sr. José Lima',
-            telefone: '(11) 98765-4321',
-            email: 'ana.lima@email.com',
-            grau: 'Grau 3',
-            status: 'Aguardando Visita',
-            valorEstimado: 'R$ 6.000,00',
-            observacao: 'Família aguarda visita técnica para avaliação e escolha do quarto. Prefere quarto individual.',
-            historico: [
-                { data: '25/09/2026', desc: 'Visita agendada para sábado às 14h.' },
-                { data: '20/09/2026', desc: 'Recebeu apresentação dos planos por WhatsApp.' }
-            ]
-        },
-        {
-            id: 3,
-            interessado: 'Roberto Silva',
-            paciente: 'Dona Teresa Silva',
-            telefone: '(11) 97222-3344',
-            email: 'roberto.silva@email.com',
-            grau: 'Grau 1',
-            status: 'Novo Lead',
-            valorEstimado: 'R$ 3.800,00',
-            observacao: 'Interessado em centro de convivência diurno.',
-            historico: []
-        },
-        {
-            id: 4,
-            interessado: 'Fernanda Oliveira',
-            paciente: 'Sra. Lourdes Oliveira',
-            telefone: '(11) 96333-4455',
-            email: 'fernanda.o@email.com',
-            grau: 'Grau 3',
-            status: 'Convertido',
-            valorEstimado: 'R$ 5.500,00',
-            observacao: 'Contrato assinado. Entrada prevista para a próxima segunda-feira.',
-            historico: [
-                { data: '29/09/2026', desc: 'Contrato de prestação de serviços assinado!' },
-                { data: '15/09/2026', desc: 'Visita presencial realizada com sucesso.' }
-            ]
-        },
-        {
-            id: 5,
-            interessado: 'Marcos Costa',
-            paciente: 'Sr. Benedito Costa',
-            telefone: '(11) 95444-5566',
-            email: 'marcos.costa@email.com',
-            grau: 'Grau 2',
-            status: 'Aguardando Visita',
-            valorEstimado: 'R$ 4.500,00',
-            observacao: 'Aguardando disponibilidade de horário do médico da família.',
-            historico: []
-        },
-        {
-            id: 6,
-            interessado: 'Juliana Alves',
-            paciente: 'Dona Helena Alves',
-            telefone: '(11) 94555-6677',
-            email: 'juliana.alves@email.com',
-            grau: 'Grau 1',
-            status: 'Em Contato',
-            valorEstimado: 'R$ 3.900,00',
-            observacao: 'Proposta comercial enviada por e-mail.',
-            historico: []
+export default function Leads({ onAtualizar }) {
+    // Lista dinâmica carregada da API (sem dados mockados)
+    const [leads, setLeads] = useState([]);
+    const [carregando, setCarregando] = useState(false);
+
+    const carregarLeads = async () => {
+        setCarregando(true);
+        try {
+            const resp = await listarLeads();
+            if (resp && resp.dados) {
+                setLeads(resp.dados);
+            }
+        } catch (erro) {
+            console.error('Erro ao carregar leads:', erro);
+        } finally {
+            setCarregando(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        carregarLeads();
+    }, []);
 
     // UI States
     const [termoBusca, setTermoBusca] = useState('');
@@ -148,7 +87,14 @@ export default function Leads() {
         setModalAberta(true);
     };
 
-    const handleSalvarLead = (e) => {
+    const totalLeads = leads.length;
+    const novosLeads = leads.filter(l => l.status === 'Novo Lead').length;
+    const emContato = leads.filter(l => l.status === 'Em Contato').length;
+    const aguardandoVisita = leads.filter(l => l.status === 'Aguardando Visita').length;
+    const leadsConvertidos = leads.filter(l => l.status === 'Convertido').length;
+    const taxaConversao = totalLeads > 0 ? Math.round((leadsConvertidos / totalLeads) * 100) : 0;
+
+    const handleSalvarLead = async (e) => {
         e.preventDefault();
         if (!formInteressado) return;
 
@@ -172,7 +118,6 @@ export default function Leads() {
             );
         } else {
             const novo = {
-                id: Date.now(),
                 interessado: formInteressado,
                 paciente: formPaciente || 'A definir',
                 telefone: formTelefone || '(11) 90000-0000',
@@ -183,7 +128,15 @@ export default function Leads() {
                 observacao: formObservacao,
                 historico: []
             };
-            setLeads([novo, ...leads]);
+
+            try {
+                await criarLead(novo);
+                await carregarLeads();
+                if (onAtualizar) onAtualizar();
+            } catch (err) {
+                console.error('Falha ao salvar lead no backend:', err);
+                setLeads([{ ...novo, id: Date.now() }, ...leads]);
+            }
         }
 
         setModalAberta(false);
@@ -245,38 +198,38 @@ export default function Leads() {
                 </div>
             </div>
 
-            {/* 2. KPI Metrics Grid */}
+            {/* 2. KPI Metrics Grid calculados dinamicamente */}
             <div className="metrics-grid">
                 <div className="metric-card">
                     <div className="metric-card-header">
-                        <span className="metric-label">ALCANCE DE MARKETING</span>
+                        <span className="metric-label">TOTAL DE LEADS NO FUNIL</span>
                         <span className="badge-trend trend-positive">
                             <FiTrendingUp size={12} />
-                            ↑ 18% vs mês anterior
+                            {totalLeads} no pipeline
                         </span>
                     </div>
-                    <span className="metric-value value-alcance">1.248</span>
+                    <span className="metric-value value-alcance">{totalLeads}</span>
                 </div>
 
                 <div className="metric-card">
                     <div className="metric-card-header">
-                        <span className="metric-label">NOVOS LEADS — JULHO</span>
+                        <span className="metric-label">NOVOS LEADS</span>
                         <span className="badge-trend trend-positive">
                             <FiTrendingUp size={12} />
-                            ↑ 12% vs mês anterior
+                            {novosLeads} novos
                         </span>
                     </div>
-                    <span className="metric-value value-entradas">34</span>
+                    <span className="metric-value value-entradas">{novosLeads}</span>
                 </div>
 
                 <div className="metric-card">
                     <div className="metric-card-header">
                         <span className="metric-label">LEADS CONVERTIDOS</span>
                         <span className="badge-trend trend-positive">
-                            Taxa: 23%
+                            Taxa: {taxaConversao}%
                         </span>
                     </div>
-                    <span className="metric-value value-saldo">8</span>
+                    <span className="metric-value value-saldo">{leadsConvertidos}</span>
                 </div>
             </div>
 
@@ -292,51 +245,51 @@ export default function Leads() {
                     <div className="funnel-steps-container">
                         <div className="funnel-step-item">
                             <div className="funnel-step-info">
-                                <span className="funnel-step-name">Alcance</span>
-                                <span className="funnel-step-count">1.248</span>
+                                <span className="funnel-step-name">Alcance Total</span>
+                                <span className="funnel-step-count">{totalLeads}</span>
                             </div>
                             <div className="funnel-bar-bg">
-                                <div className="funnel-bar-fill fill-alcance" style={{ width: '100%' }}></div>
+                                <div className="funnel-bar-fill fill-alcance" style={{ width: totalLeads > 0 ? '100%' : '0%' }}></div>
                             </div>
                         </div>
 
                         <div className="funnel-step-item">
                             <div className="funnel-step-info">
                                 <span className="funnel-step-name">Novos Leads</span>
-                                <span className="funnel-step-count">34</span>
+                                <span className="funnel-step-count">{novosLeads}</span>
                             </div>
                             <div className="funnel-bar-bg">
-                                <div className="funnel-bar-fill fill-novos" style={{ width: '70%' }}></div>
+                                <div className="funnel-bar-fill fill-novos" style={{ width: totalLeads > 0 ? `${Math.round((novosLeads / totalLeads) * 100)}%` : '0%' }}></div>
                             </div>
                         </div>
 
                         <div className="funnel-step-item">
                             <div className="funnel-step-info">
                                 <span className="funnel-step-name">Em Contato</span>
-                                <span className="funnel-step-count">20</span>
+                                <span className="funnel-step-count">{emContato}</span>
                             </div>
                             <div className="funnel-bar-bg">
-                                <div className="funnel-bar-fill fill-contato" style={{ width: '50%' }}></div>
+                                <div className="funnel-bar-fill fill-contato" style={{ width: totalLeads > 0 ? `${Math.round((emContato / totalLeads) * 100)}%` : '0%' }}></div>
                             </div>
                         </div>
 
                         <div className="funnel-step-item">
                             <div className="funnel-step-info">
                                 <span className="funnel-step-name">Ag. Visita</span>
-                                <span className="funnel-step-count">11</span>
+                                <span className="funnel-step-count">{aguardandoVisita}</span>
                             </div>
                             <div className="funnel-bar-bg">
-                                <div className="funnel-bar-fill fill-visita" style={{ width: '32%' }}></div>
+                                <div className="funnel-bar-fill fill-visita" style={{ width: totalLeads > 0 ? `${Math.round((aguardandoVisita / totalLeads) * 100)}%` : '0%' }}></div>
                             </div>
                         </div>
 
                         <div className="funnel-step-item">
                             <div className="funnel-step-info">
                                 <span className="funnel-step-name">Convertidos</span>
-                                <span className="funnel-step-count">8</span>
+                                <span className="funnel-step-count">{leadsConvertidos}</span>
                             </div>
                             <div className="funnel-bar-bg">
-                                <div className="funnel-bar-fill fill-convertidos" style={{ width: '22%' }}></div>
+                                <div className="funnel-bar-fill fill-convertidos" style={{ width: totalLeads > 0 ? `${Math.round((leadsConvertidos / totalLeads) * 100)}%` : '0%' }}></div>
                             </div>
                         </div>
                     </div>
@@ -403,8 +356,8 @@ export default function Leads() {
                                 </div>
                             ))
                         ) : (
-                            <div style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
-                                Nenhum lead encontrado.
+                            <div style={{ textAlign: 'center', padding: '36px', color: '#786565' }}>
+                                {carregando ? 'Carregando leads...' : 'Nenhum lead cadastrado no momento. Clique em "Adicionar" para registrar um novo interessado.'}
                             </div>
                         )}
                     </div>

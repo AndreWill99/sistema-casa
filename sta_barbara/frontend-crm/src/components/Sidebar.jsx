@@ -13,11 +13,21 @@ import {
 import logoImg from '../assets/logo.png';
 import './Sidebar.css';
 
-export default function Sidebar({ abaAtiva, setAbaAtiva, onLogout }) {
+export default function Sidebar({ abaAtiva, setAbaAtiva, onLogout, contadores = {} }) {
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <FiGrid /> },
-        { id: 'residentes', label: 'Residentes', icon: <FiUsers />, badge: '35' },
-        { id: 'leads', label: 'Gestão de Leads', icon: <FiBriefcase />, badge: '23' },
+        { 
+            id: 'residentes', 
+            label: 'Residentes', 
+            icon: <FiUsers />, 
+            badge: contadores.residentes > 0 ? String(contadores.residentes) : null 
+        },
+        { 
+            id: 'leads', 
+            label: 'Gestão de Leads', 
+            icon: <FiBriefcase />, 
+            badge: contadores.leads > 0 ? String(contadores.leads) : null 
+        },
         { id: 'equipe', label: 'Equipe', icon: <FiUsers /> },
         { id: 'financeiro', label: 'Financeiro', icon: <FiDollarSign /> },
         { id: 'agenda', label: 'Agenda', icon: <FiCalendar /> },

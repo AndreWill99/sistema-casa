@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FiPlus,
     FiSearch,
@@ -15,137 +15,31 @@ import {
     FiAlertCircle,
     FiClock
 } from 'react-icons/fi';
+import { listarEquipe, criarColaborador } from '../services/api';
 import './Equipe.css';
 
-export default function Equipe() {
-    // Initial employee dataset matching Figma prototype
-    const [colaboradores, setColaboradores] = useState([
-        {
-            id: 1,
-            nome: 'Chance Vetrovs',
-            cargo: 'Enfermeiro Chefe',
-            telefone: '(11) 98765-4321',
-            status: 'Ativo',
-            dataEntrada: '02-01-2023',
-            nascimento: '1988-04-12',
-            cpf: '123.456.789-00',
-            email: 'chance.vetrovs@santabarbara.com',
-            turno: 'Plantão Diurno',
-            salario: 'R$ 4.500,00',
-            escala: '12x36',
-            banco: 'Banco do Brasil',
-            tipoConta: 'Conta Corrente',
-            historicoPagamentos: [
-                { titulo: 'pagamento2026/1', mes: 'Janeiro', valor: 'R$ 4.500,00' },
-                { titulo: 'pagamento2026/2', mes: 'Fevereiro', valor: 'R$ 4.500,00' }
-            ],
-            registros: [
-                { tipo: 'Falta Justificada', motivo: 'Motivos de saúde (Atestado)', data: '15/02/2026' }
-            ]
-        },
-        {
-            id: 2,
-            nome: 'Emery Aminoff',
-            cargo: 'Cozinheira',
-            telefone: '(11) 97654-3210',
-            status: 'Ativo',
-            dataEntrada: '15-03-2024',
-            nascimento: '1992-08-25',
-            cpf: '234.567.890-11',
-            email: 'emery.aminoff@santabarbara.com',
-            turno: 'Manhã',
-            salario: 'R$ 2.800,00',
-            escala: '6x1',
-            banco: 'Bradesco',
-            tipoConta: 'Conta Corrente',
-            historicoPagamentos: [
-                { titulo: 'pagamento2026/1', mes: 'Janeiro', valor: 'R$ 2.800,00' }
-            ],
-            registros: []
-        },
-        {
-            id: 3,
-            nome: 'Gustavo Geidt',
-            cargo: 'Administrador',
-            telefone: '(11) 96543-2109',
-            status: 'Ativo',
-            dataEntrada: '10-10-2022',
-            nascimento: '1985-11-30',
-            cpf: '345.678.901-22',
-            email: 'gustavo.geidt@santabarbara.com',
-            turno: 'Horário Comercial',
-            salario: 'R$ 6.200,00',
-            escala: '5x2',
-            banco: 'Itaú',
-            tipoConta: 'Conta Corrente',
-            historicoPagamentos: [
-                { titulo: 'pagamento2026/1', mes: 'Janeiro', valor: 'R$ 6.200,00' }
-            ],
-            registros: []
-        },
-        {
-            id: 4,
-            nome: 'Makenna Dokidis',
-            cargo: 'Médica Geriatra',
-            telefone: '(11) 95432-1098',
-            status: 'Afastado',
-            dataEntrada: '01-06-2021',
-            nascimento: '1980-02-14',
-            cpf: '456.789.012-33',
-            email: 'makenna.dokidis@santabarbara.com',
-            turno: 'Terças e Quintas',
-            salario: 'R$ 9.800,00',
-            escala: 'Horário Comercial',
-            banco: 'Santander',
-            tipoConta: 'Conta Corrente',
-            historicoPagamentos: [
-                { titulo: 'pagamento2026/1', mes: 'Janeiro', valor: 'R$ 9.800,00' }
-            ],
-            registros: [
-                { tipo: 'Licença Médica', motivo: 'Cirurgia agendada', data: '01/03/2026' }
-            ]
-        },
-        {
-            id: 5,
-            nome: 'Carla Beatriz',
-            cargo: 'Cuidadora de Idosos',
-            telefone: '(11) 94321-0987',
-            status: 'Ativo',
-            dataEntrada: '20-08-2023',
-            nascimento: '1995-07-19',
-            cpf: '567.890.123-44',
-            email: 'carla.beatriz@santabarbara.com',
-            turno: 'Plantão Noturno',
-            salario: 'R$ 3.100,00',
-            escala: '12x36',
-            banco: 'Caixa Econômica',
-            tipoConta: 'Conta Poupança',
-            historicoPagamentos: [
-                { titulo: 'pagamento2026/1', mes: 'Janeiro', valor: 'R$ 3.100,00' }
-            ],
-            registros: []
-        },
-        {
-            id: 6,
-            nome: 'Roberto Souza',
-            cargo: 'Técnico de Enfermagem',
-            telefone: '(11) 93210-9876',
-            status: 'Desligado',
-            dataEntrada: '12-05-2020',
-            nascimento: '1983-09-05',
-            cpf: '678.901.234-55',
-            email: 'roberto.souza@santabarbara.com',
-            turno: 'Integral',
-            salario: 'R$ 3.400,00',
-            escala: '12x36',
-            banco: 'Nubank',
-            tipoConta: 'Conta Corrente',
-            historicoPagamentos: [],
-            registros: [
-                { tipo: 'Rescisão', motivo: 'Desligamento a pedido', data: '10/01/2026' }
-            ]
+export default function Equipe({ onAtualizar }) {
+    // Lista dinâmica carregada da API (sem dados mockados)
+    const [colaboradores, setColaboradores] = useState([]);
+    const [carregando, setCarregando] = useState(false);
+
+    const carregarEquipe = async () => {
+        setCarregando(true);
+        try {
+            const resp = await listarEquipe();
+            if (resp && resp.dados) {
+                setColaboradores(resp.dados);
+            }
+        } catch (erro) {
+            console.error('Erro ao carregar equipe:', erro);
+        } finally {
+            setCarregando(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        carregarEquipe();
+    }, []);
 
     // UI Control States
     const [termoBusca, setTermoBusca] = useState('');
@@ -212,7 +106,7 @@ export default function Equipe() {
         setModalAberta(true);
     };
 
-    const handleSalvarColaborador = (e) => {
+    const handleSalvarColaborador = async (e) => {
         e.preventDefault();
         if (!formNome) return;
 
@@ -243,12 +137,11 @@ export default function Equipe() {
         } else {
             // Add new
             const novo = {
-                id: Date.now(),
                 nome: formNome,
                 cargo: formCargo,
                 telefone: formTelefone || '(11) 90000-0000',
                 status: formStatus,
-                dataEntrada: formDataEntrada || '01-04-2026',
+                dataEntrada: formDataEntrada || new Date().toLocaleDateString('pt-BR'),
                 nascimento: formNascimento,
                 cpf: formCpf,
                 email: formEmail,
@@ -260,7 +153,15 @@ export default function Equipe() {
                 historicoPagamentos: [],
                 registros: []
             };
-            setColaboradores([novo, ...colaboradores]);
+
+            try {
+                await criarColaborador(novo);
+                await carregarEquipe();
+                if (onAtualizar) onAtualizar();
+            } catch (err) {
+                console.error('Falha ao salvar colaborador no backend:', err);
+                setColaboradores([{ ...novo, id: Date.now() }, ...colaboradores]);
+            }
         }
 
         setModalAberta(false);
@@ -452,8 +353,8 @@ export default function Equipe() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: '#888' }}>
-                                        Nenhum colaborador encontrado.
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: '#786565' }}>
+                                        {carregando ? 'Carregando colaboradores...' : 'Nenhum colaborador cadastrado. Clique em "Adicionar" para registrar membros da equipe.'}
                                     </td>
                                 </tr>
                             )}

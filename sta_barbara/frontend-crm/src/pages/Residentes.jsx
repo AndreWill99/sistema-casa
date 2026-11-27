@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FiPlus,
     FiSearch,
@@ -14,106 +14,31 @@ import {
     FiCheck,
     FiTrash2
 } from 'react-icons/fi';
+import { listarResidentes, criarResidente } from '../services/api';
 import './Residentes.css';
 
-export default function Residentes() {
-    // Dataset matching Figma design
-    const [residentes, setResidentes] = useState([
-        {
-            id: 1,
-            nome: 'Maria Helena Silva',
-            idade: 82,
-            grau: 'Grau 1',
-            quarto: 'Quarto 102-A',
-            status: 'Residente',
-            responsavel: 'Ana Silva (Filha)',
-            telefone: '(11) 98765-4321',
-            dataNascimento: '14/05/1944',
-            dataEntrada: '12-05-2022',
-            grauDesc: 'Grau I - independente, apresentando autonomia funcional para as atividades da vida diária',
-            alergias: ['Dermatite atópica'],
-            incidentes: [
-                { id: 101, data: '15/09/2026', nivel: 'Atenção', desc: 'Queixou-se de leve tontura pela manhã. Sinais vitais checados e normais.' }
-            ]
-        },
-        {
-            id: 2,
-            nome: 'Antônio Carlos Souza',
-            idade: 79,
-            grau: 'Grau 2',
-            quarto: 'Quarto 104-B',
-            status: 'Residente',
-            responsavel: 'Marcos Souza (Filho)',
-            telefone: '(11) 91234-5678',
-            dataNascimento: '22/08/1947',
-            dataEntrada: '21-08-2021',
-            grauDesc: 'Grau II - dependência em até três atividades de autocuidado diário',
-            alergias: ['Penicilina', 'Dipirona'],
-            incidentes: [
-                { id: 102, data: '20/09/2026', nivel: 'Crítico', desc: 'Queda da própria altura ao levantar da cama. Avaliado pela equipe médica, sem fraturas.' }
-            ]
-        },
-        {
-            id: 3,
-            nome: 'Joana Darc Oliveira',
-            idade: 88,
-            grau: 'Grau 3',
-            quarto: 'Quarto 201-A',
-            status: 'Residente',
-            responsavel: 'Beatriz Oliveira (Neta)',
-            telefone: '(11) 97777-8888',
-            dataNascimento: '03/02/1938',
-            dataEntrada: '10-10-2020',
-            grauDesc: 'Grau III - alta dependência funcional e cuidados de enfermagem contínuos',
-            alergias: ['Lactose'],
-            incidentes: []
-        },
-        {
-            id: 4,
-            nome: 'Francisca Lima',
-            idade: 76,
-            grau: 'Grau 1',
-            quarto: 'Quarto 105-A',
-            status: 'Residente',
-            responsavel: 'Eduardo Lima (Irmão)',
-            telefone: '(11) 95555-4444',
-            dataNascimento: '11/11/1950',
-            dataEntrada: '15-03-2024',
-            grauDesc: 'Grau I - independente, apresentando autonomia funcional',
-            alergias: [],
-            incidentes: []
-        },
-        {
-            id: 5,
-            nome: 'José Pedro Santos',
-            idade: 85,
-            grau: 'Grau 2',
-            quarto: 'Quarto 108-B',
-            status: 'Residente',
-            responsavel: 'Carla Santos (Nora)',
-            telefone: '(11) 93333-2222',
-            dataNascimento: '30/06/1941',
-            dataEntrada: '02-01-2023',
-            grauDesc: 'Grau II - dependência em até três atividades de autocuidado',
-            alergias: ['Dipirona'],
-            incidentes: []
-        },
-        {
-            id: 6,
-            nome: 'Alzira Fernandes',
-            idade: 91,
-            grau: 'Grau 3',
-            quarto: 'Quarto 203-A',
-            status: 'Residente',
-            responsavel: 'Paulo Fernandes (Filho)',
-            telefone: '(11) 96666-1111',
-            dataNascimento: '18/09/1935',
-            dataEntrada: '20-06-2022',
-            grauDesc: 'Grau III - alta dependência funcional',
-            alergias: ['Sulfa'],
-            incidentes: []
+export default function Residentes({ onAtualizar }) {
+    // Lista dinâmica carregada da API (sem dados mockados)
+    const [residentes, setResidentes] = useState([]);
+    const [carregando, setCarregando] = useState(false);
+
+    const carregarResidentes = async () => {
+        setCarregando(true);
+        try {
+            const resp = await listarResidentes();
+            if (resp && resp.dados) {
+                setResidentes(resp.dados);
+            }
+        } catch (erro) {
+            console.error('Erro ao carregar residentes:', erro);
+        } finally {
+            setCarregando(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        carregarResidentes();
+    }, []);
 
     // UI States
     const [termoBusca, setTermoBusca] = useState('');
@@ -216,7 +141,7 @@ export default function Residentes() {
         setNovoIncidenteDesc('');
     };
 
-    const handleSalvarResidente = (e) => {
+    const handleSalvarResidente = async (e) => {
         e.preventDefault();
         if (!formNome) return;
 
@@ -248,21 +173,28 @@ export default function Residentes() {
             );
         } else {
             const novo = {
-                id: Date.now(),
                 nome: formNome,
                 idade: 80,
-                grau: formGrau,
+                grau: formGrau === 'Grau 2' ? 2 : (formGrau === 'Grau 3' ? 3 : 1),
                 quarto: formQuarto,
                 status: formStatus,
                 responsavel: formResponsavel || 'A definir',
                 telefone: formTelefone || '(11) 90000-0000',
+                data_entrada: formDataEntrada,
                 dataNascimento: formDataNasc,
-                dataEntrada: formDataEntrada,
                 grauDesc: grauDescMap[formGrau] || '',
-                alergias: formAlergias,
+                alergias: formAlergias.join(', '),
                 incidentes: []
             };
-            setResidentes([novo, ...residentes]);
+
+            try {
+                await criarResidente(novo);
+                await carregarResidentes();
+                if (onAtualizar) onAtualizar();
+            } catch (err) {
+                console.error('Falha ao salvar residente no backend:', err);
+                setResidentes([{ ...novo, id: Date.now() }, ...residentes]);
+            }
         }
 
         setModalAberta(false);
@@ -429,8 +361,8 @@ export default function Residentes() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: '#888' }}>
-                                        Nenhum residente encontrado.
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '36px', color: '#786565' }}>
+                                        {carregando ? 'Carregando residentes...' : 'Nenhum residente cadastrado no sistema. Clique em "Adicionar" para registrar o primeiro residente.'}
                                     </td>
                                 </tr>
                             )}
